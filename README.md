@@ -9,7 +9,7 @@ var stream = new Stream()
 
 stream.on('either this event', 'or this one').run(thisHandler, andThisToo)
 
-stream.emit('event one', ...args)
+stream.emit('event name', ...args)
 ```
 
 Okie dokie, let's get into it. What's so cool about tiny sub? Well, there are a couple of ways it differs from traditional event libraries. For starters...
@@ -47,11 +47,11 @@ function render() {
 }
 stream.on('state change').run(diff, render)
 ```
-> note: as a personal rule, I try not to use lambdas excessively. Naming functions can make your code significantly cleaner and easier to debug.
+> note: as a personal rule, I try not to use lambdas excessively. Naming functions can make your code significantly cleaner and easier to debug, especially when dealing with async.
 
 ## Stream/stream.emit('event'[, ...args])
 
-To fire an event, you pass the name first followed by any arguments you want to pass the listeners. Pretty self explanatory. But wait! It has a slight twist - you can fire that event for *every Stream instance at once!* Every event stream can be controlled from the constructor by calling emit. Let's take a look...
+To fire an event, you pass the name first, followed by any arguments you want to send. Pretty self explanatory. But wait! It has a slight twist - you can fire that event for *every Stream instance at once!* Every event stream can be controlled from the constructor by calling emit. Let's take a look...
 
 ```javascript
 var ui = new Stream()
@@ -113,4 +113,5 @@ If you're having difficulties with function order, here's a pro tip: handlers ar
 Welp, that's pretty much it for the API! If you have any issues or questions, submit an issue or a pull request and I'll follow up with you. If you're looking for a more powerful async library, check out another project of mine, [Callback.js](https://github.com/PsychoLlama/CallbackJS).
 
 I'd love to hear from you, so send me any feedback you have!
+
 \- You're awesome.
