@@ -87,8 +87,9 @@ var Stream;
   };
 
   Stream.emit = function (name) {
+		var args = array(arguments);
     streams.forEach(function (stream) {
-      stream.emit(name);
+      stream.emit.apply(stream, args);
     });
     return Stream;
   };
