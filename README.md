@@ -1,117 +1,95 @@
-# tiny sub
+# Iso-emitter
+[![npm](https://img.shields.io/npm/v/npm.svg?style=flat-square)](https://www.npmjs.com/package/iso-emitter)[![Travis](https://img.shields.io/travis/PsychoLlama/iso-emitter.svg?style=flat-square)](https://travis-ci.org/PsychoLlama/iso-emitter)[![Gitter](https://img.shields.io/badge/chat-on%20gitter-red.svg?style=flat-square)](https://gitter.im/PsychoLlama/iso-emitter)
 
-A capable, light-weight event emitter for node or the browser.
+Just an isomorphic event emitter
 
-Before we go too far, it's nice to see some code in action and get a feel for how it works...
+## why
+The libraries I build are often expected to work
+in node and the browser with the same code,
+and to keep things portable, I avoid build steps.
+They're awesome, but they have their place.
+
+Iso-emitter is a tiny event emitter that
+is node agnostic.
+
+It's also splat oriented:
 
 ```javascript
-var stream = new Stream()
+var stream = new Stream
+stream.on('event 1', 'event 2', handler1, handler2)
 
-stream.on('either this event', 'or this one').run(thisHandler, andThisToo)
-
-stream.emit('event name', ...args)
+stream.emit('event 1' /*, arguments */ )
+// both handlers are invoked
 ```
 
-Okie dokie, let's get into it. What's so cool about tiny sub? Well, there are a couple of ways it differs from traditional event libraries. For starters...
+## usage
+Iso-emitter is intentionally kept simple.
 
-- events can share state through the `this` object.
-- event instances are scoped, not global.
-- incredibly succinct splat-oriented API.
-- optionally, emit an event across *every* instance.
+### `on(...events, ...callbacks)`
+Now coming to a theater near you, *splat oriented API* (bum bumda bum!)
 
-Now that you've got an idea of what tiny sub does for you, let's dig into some API.
+Events are strings. Callbacks are functions. It really doesn't matter what
+order you put them in, but to keep things clean, I recommend
+ordering events left, callbacks right.
 
-## stream.on(event[, ...event])
+### `emit(event[, arguments])`
+Call emit, optionally with arguments, to invoke all subscribed functions.
 
-`.on` is how you declare which events you want to subscribe to. It takes as many arguments as you want, allowing you to subscribe to multiple events all at once (say whaaaaaa?). Here's what it looks like:
+### `bind(...events)`
+After passing in the events you want to emit on, it'll return a function
+that emits to each of them. Named after the glorious `Function.prototype.bind`.
 
+### `Stream.emit`
+When you call it from the constructor, it emits globally, on every
+stream instance.
+
+### Examples:
+
+**Listening**
 ```javascript
-stream
-.on('collision', 'kicked', 'out of bounds')
-.run(function (player, event) {
-  // remove the player
-});
+var stream = new Stream
+stream.on('turn', function (direction) {
+	var positions = {
+		Up: { direction: -1, axis: 'y' },
+		Down: { direction: 1, axis: 'y' },
+		Left: { direction: -1, axis: 'x' },
+		Right: { direction: 1, axis: 'x' },
+	}
+	player.direction(positions[direction])
+})
 ```
 
-## stream.run(handler[, ...handler])
-
-Now that know how to target events, `run` is how you handle them. Like `.on`, you can pass in as many event handlers as you want, leading to a very powerful API. Here's an example:
-
+**Binding**
 ```javascript
-function diff(state) {
-  // find the difference
-  this.diff = diff;
+var turn = (new Stream).bind('turn', 'render')
+
+window.onkeydown = function (e) {
+	if (typeof e.key === 'string') {
+		var direction = e.key.match(/Arrow(\w+)/)
+		turn(direction[1])
+	}
 }
-function render() {
-  // render this.diff
-}
-stream.on('state change').run(diff, render)
 ```
-> note: as a personal rule, I try not to use lambdas excessively. Naming functions can make your code significantly cleaner and easier to debug, especially when dealing with async.
 
-## Stream/stream.emit('event'[, ...args])
-
-To fire an event, you pass the name first, followed by any arguments you want to send. Pretty self explanatory. But wait! It has a slight twist - you can fire that event for *every Stream instance at once!* Every event stream can be controlled from the constructor by calling emit. Let's take a look...
-
+**splat subscribing**
 ```javascript
-var ui = new Stream()
-ui.on('join').run(animation.join)
-var state = new Stream()
-state.on('join').run(process.user)
-
-Stream.emit('join', user)
+stream.on(
+	'out of bounds',
+	'collision',
+	player.eliminate
+)
 ```
 
-In the example, both `ui` and `state` will receive the join event and user argument, even though they're unique streams.
-
-## Stream/stream.bind('event'[...'event'])
-
-Turn your event into a function by using `.bind`, allowing you to pass it to things like `setTimeout`, DOM events and anything else that accepts a function. You give it a list of events to fire, and it returns a function that accepts the arguments to emit with. Examples!
-
+**emitting**
 ```javascript
-var addImage = slide.bind('next image')
-
-button.addEventListener('click', addImage)
-setInterval(addImage, 3000)
+stream.on('move', function (coords) {
+	if (outOfBounds(coords)) {
+		stream.emit('out of bounds', player)
+	}
+})
 ```
 
-Similar to `.emit`, `.bind` can be used with the Stream constructor to emit on every instance.
+## Finishing words
 
-## event state
-
-This is a pretty neat part of tiny sub. Every event has it's own state, allowing those callbacks to communicate with each other. The state is accessed through the `this` object. Let's see what it looks like in action!
-
-```javascript
-function validate(input) {
-  // validate
-  if (!valid) {
-    this.invalid = true;
-  }
-}
-function encrypt(input) {
-  if (this.invalid) {
-    return;
-  }
-  // encrypt input
-  this.encrypted = encrypted;
-}
-function send(input) {
-  if (this.invalid) {
-    return;
-  }
-  // send this.encrypted
-}
-
-stream.on('input').run(validate, encrypt, send);
-```
-
-## closing notes
-
-If you're having difficulties with function order, here's a pro tip: handlers are invoked in the order which they subscribed.
-
-
-Welp, that's pretty much it for the API! If you have any issues or questions, submit an issue or a pull request and I'll follow up with you. If you're looking for a more powerful async library, check out another project of mine, [Callback.js](https://github.com/PsychoLlama/CallbackJS).
-
-I'd love to hear from you, so send me any feedback you have!
-
-\- You're awesome.
+Hope ya like it. If you find any problems, hit me up on gitter or submit
+an issue or pull request.

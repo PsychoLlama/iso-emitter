@@ -1,111 +1,97 @@
+/*global module*/
+
 var Stream;
 
 (function () {
-  'use strict';
+	'use strict';
 
-  var streams = [];
+	var streams = [];
 
+	function array(obj) {
+		return Array.prototype.slice.call(obj);
+	}
 
-  function array(object) {
-    var target = [];
+	function callbacks(args) {
+		return array(args).filter(function (cb) {
+			return typeof cb === 'function';
+		});
+	}
 
-    Object.keys(object).forEach(function (key) {
-      target[key] = object[key];
-    });
+	function events(args) {
+		return array(args).filter(function (event) {
+			return typeof event === 'string';
+		});
+	}
 
-    return target;
-  }
+	Stream = function () {
+		if (!(this instanceof Stream)) {
+			return new Stream();
+		}
+		this.events = {};
+		streams.push(this);
+	};
 
-  Stream = function () {
-    var instance = this instanceof Stream;
-    
-    if (!instance) {
-      return new Stream();
-    }
-    
-    this.event = {};
-    this.state = {};
+	Stream.prototype = {
+		constructor: Stream,
+		on: function () {
+			var cbs, names, stream = this;
+			cbs = callbacks(arguments);
+			names = events(arguments);
 
-    streams.push(this);
-  };
+			names.forEach(function (event) {
+				cbs.forEach(function (cb) {
+					if (!stream.events[event]) {
+						stream.events[event] = [];
+					}
+					stream.events[event].push(cb);
+				});
+			});
 
-  Stream.prototype = {
-    constructor: Stream,
-    on: function () {
-      var events = array(arguments),
-        stream = this;
-      stream.target = events.map(function (event) {
-        if (!stream.event[event]) {
-          stream.event[event] = [];
-          stream.state[event] = {};
-        }
-        return stream.event[event];
-      });
-      return this;
-    },
+			return this;
+		},
 
-    run: function () {
-      var stream = this;
-      array(arguments).forEach(function (cb) {
-        stream.target.forEach(function (target) {
-          target.push(cb);
-        });
-      });
+		emit: function (event) {
+			if (!event) {
+				return this;
+			}
+			var args = array(arguments).slice(1);
+			if (!this.events[event]) {
+				return this;
+			}
+			this.events[event].forEach(function (cb) {
+				cb.apply(null, args);
+			});
 
-      return this;
-    },
+			return this;
+		},
 
-    emit: function (name) {
-      var events = this.event[name],
-        state = this.state[name],
-        splats = array(arguments).slice(1);
+		bind: function () {
+			var names, stream = this;
+			names = events(arguments);
 
-      if (!events) {
-        return this;
-      }
+			return function () {
+				var args = array(arguments);
 
-      events.forEach(function (event) {
-        try {
-          event.apply(state, splats);
-        } catch (e) {}
-      });
-      return this;
-    },
-    
-    bind: function () {
-      var events = array(arguments),
-        stream = this;
-      
-      return function () {
-        var args = array(arguments);
-        
-        events.forEach(function (event) {
-          stream.emit.apply(stream, [event].concat(args));
-        });
-      };
-    }
-  };
+				names.forEach(function (event) {
+					stream.emit.apply(stream, [event].concat(args));
+				});
 
-  Stream.emit = function (name) {
+				return names.length;
+			};
+		}
+
+	};
+
+	Stream.emit = function (event) {
 		var args = array(arguments);
-    streams.forEach(function (stream) {
-      stream.emit.apply(stream, args);
-    });
-    return Stream;
-  };
-  
-  Stream.bind = function () {
-    var events = array(arguments);
-    
-    return function () {
-      var args = array(arguments);
-      
-      streams.forEach(function (stream) {
-        events.forEach(function (event) {
-          stream.emit.apply(stream, [event].concat(args));
-        });
-      });
-    };
-  };
+		streams.forEach(function (stream) {
+			stream.emit.apply(stream, args);
+		});
+		return streams.length;
+	};
+
+	if (typeof module !== 'undefined') {
+		module.exports = Stream;
+	}
 
 }());

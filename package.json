@@ -1,0 +1,33 @@
+{
+  "name": "iso-emitter",
+  "version": "1.0.0",
+  "description": "A light-weight isomorphic event emitter",
+  "main": "stream.js",
+  "scripts": {
+    "test": "jasmine"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PsychoLlama/iso-emitter.git"
+  },
+  "keywords": [
+    "event",
+    "events",
+    "isomorphic",
+    "universal",
+    "light",
+    "simple",
+    "emitter",
+    "pub-sub",
+    "event-stream"
+  ],
+  "author": "Jesse Gibson <jesse@gundb.io> (http://techllama.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/PsychoLlama/iso-emitter/issues"
+  },
+  "homepage": "https://github.com/PsychoLlama/iso-emitter#readme",
+  "devDependencies": {
+    "jasmine": "^2.4.1"
+  }
+}
