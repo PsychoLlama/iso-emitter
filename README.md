@@ -1,9 +1,14 @@
-# Iso-emitter
+# [UNMAINTAINED] Iso-emitter
 [![npm](https://img.shields.io/npm/v/npm.svg?style=flat-square)](https://www.npmjs.com/package/iso-emitter)[![Travis](https://img.shields.io/travis/PsychoLlama/iso-emitter.svg?style=flat-square)](https://travis-ci.org/PsychoLlama/iso-emitter)[![Gitter](https://img.shields.io/badge/chat-on%20gitter-red.svg?style=flat-square)](https://gitter.im/PsychoLlama/iso-emitter)
 
 Just an isomorphic event emitter
 
-## why
+## Maintenance Notice
+I don't maintain this. In fact, I'd like to forget I wrote it, but some projects need to stay around and keep my humility in check.
+
+Please hide your eyes and move along.
+
+## Why
 The libraries I build are often expected to work
 in node and the browser with the same code,
 and to keep things portable, I avoid build steps.
@@ -22,7 +27,7 @@ stream.emit('event 1' /*, arguments */ )
 // both handlers are invoked
 ```
 
-## usage
+## Usage
 Iso-emitter is intentionally kept simple.
 
 ### `on(...events, ...callbacks)`
@@ -89,7 +94,7 @@ stream.on('move', function (coords) {
 })
 ```
 
-## Finishing words
+## Finishing Words
 
 Hope ya like it. If you find any problems, hit me up on gitter or submit
 an issue or pull request.
